@@ -6,6 +6,9 @@ vitals, environmental readings, measurement history, and speaker-labelled transc
 The interface uses the Pi's navy, mint, blue, and amber theme, with prominent
 vitals, patient information at the top, and compact environmental cards.
 
+The [two-phase project document](docs/PROJECT_UPGRADE_PLAN.md) describes the
+patient monitoring upgrade and the subsequent offline speech upgrade.
+
 ## Run locally
 
 Use Node.js **26.x**. The verified Windows runtime is **26.13.1**.
@@ -109,9 +112,22 @@ variables on **Vercel**:
 npx firebase-tools@15.35.0 deploy --only firestore:rules --project immortals-3
 ```
 
+If several Firebase CLI accounts are saved, select the account that owns this
+project using `--account`. Rule tests use only the local `demo-immortals` emulator:
+
+```sh
+npm run test:rules
+```
+
+Java 21 or later is required for the current Firestore emulator. These six checks
+cover anonymous access, verified viewers, disabled users, claims, write denial,
+and isolation of the access list and unrelated collections.
+
 ## Vercel and GitHub
 
 Repository: <https://github.com/tirthankardgen-cell/Immortals-dashboard>.
+Production: <https://immortals-dashboard.vercel.app>.
+Fictional preview: <https://immortals-dashboard.vercel.app/?view=preview>.
 The repository root is the contents of this `Website` folder, so the Vercel Root
 Directory is the repository root. The linked project is `immortals-dashboard`
 under `tirthankar-s`. `vercel.json` selects Next.js; `package.json` selects Node 26.x.
@@ -122,6 +138,10 @@ then deploy:
 ```sh
 npx vercel@65.14.0 --prod
 ```
+
+Firebase web configuration is set for all three Vercel environments. The
+production website is public; Firebase rules control patient access. Vercel
+preview deployments retain Vercel Authentication protection.
 
 No additional Express server, Python runtime, or Pi connection is needed by this
 website. Next.js runs its Node server/API on Vercel. `/api/health` exposes only

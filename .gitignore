@@ -12,6 +12,3 @@ next-env.d.ts
 .deployment-backups/
 firebase-debug.log*
 *.log
-
-.vercel
-.env*
