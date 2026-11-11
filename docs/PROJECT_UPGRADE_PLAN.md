@@ -658,7 +658,7 @@ The directory combines patient name/ID search with these filters:
 - **Gender:** all genders, Female, Male, Other, Prefer not to say, or not entered.
   This filter reads the sender-compatible `sex` profile field.
 - **Measurements:** all patients, measured, or not measured. Measured means a
-  saved latest snapshot exists, including an older/paused recorded capture.
+  saved latest snapshot exists, including an older recorded capture.
   Not measured means the gateway's latest document is confirmed absent.
 - **Sort and display:** name/newest order, list/grid views, and one Reset action
   for the search text and all filters.

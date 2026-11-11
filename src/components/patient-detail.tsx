@@ -84,7 +84,7 @@ export function PatientDetail({ patientId }: { patientId: string }) {
     <section className={`patient-content ${tab === 'overview' ? 'overview-content' : ''}`} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
       {tab === 'information' ? <Profile patient={patient} reading={reading}/> : tab === 'history' ? <RecordHistory state={history}/> : tab === 'transcripts' ? <Transcripts state={transcripts}/>
         : <>{latest.status === 'error' && <div className="note-bar" role="status"><Info size={14}/>{latest.error?.message}</div>}
-          {!preview && !recorded && state === 'stale' && <div className="note-bar" role="status"><Clock3 size={14}/>Monitoring is paused. Current values are cleared; previous measurements are available in Record history.</div>}
+          {!preview && !recorded && state === 'stale' && <div className="note-bar" role="status"><Clock3 size={14}/>No recent measurements. Previous readings are available in Record history.</div>}
           <div className="detail-grid"><div className="vitals-area"><h2 className="section-heading">Patient vitals<span className="text-[8px] muted font-normal">{preview ? 'Sample measurements' : recorded ? 'Last recorded capture' : 'Latest source measurements'}</span></h2>
             <div className="vital-grid">{[
               { label: 'Heart rate', number: value('pulse', 'heart_rate_bpm'), unit: 'bpm', decimals: 0, color: 'var(--green)', icon: HeartPulse, source: 'MAX30102 · optical pulse' },
