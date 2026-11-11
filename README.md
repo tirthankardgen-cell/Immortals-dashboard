@@ -6,6 +6,12 @@ vitals, environmental readings, measurement history, and speaker-labelled transc
 The interface uses the Pi's navy, mint, blue, and amber theme, with prominent
 vitals, patient information at the top, and compact environmental cards.
 
+On desktop, the right workspace fits the viewport. The directory adjusts its
+page size to the available height. The left navigation provides New patient and,
+within a patient record, Vitals, Patient information, Record history, and Transcripts.
+Long histories and transcripts scroll inside their panel. Mobile layouts remain
+readable and adapt to the smaller screen.
+
 The [two-phase project document](docs/PROJECT_UPGRADE_PLAN.md) describes the
 patient monitoring upgrade and the subsequent offline speech upgrade.
 
@@ -95,14 +101,20 @@ the patient's name alone.
 
 ## Authentication and access rules
 
-Google and email/password sign-in use Firebase Authentication. Providers must
-be enabled for the Firebase project and the deployment domain must be authorized.
-The website creates no accounts and performs no patient-data writes.
+Patient profiles, measurements, history, and transcripts are temporarily readable
+by everyone without signing in, as requested by the owner on 12 November 2026.
+Google and email/password sign-in remain available but are optional for viewing.
+The website creates no authentication accounts. The New patient form creates
+validated patient profiles without sign-in. Delete patient is also available
+without sign-in and requires confirmation; it removes the profile and its cloud
+monitoring, reading, session, and transcript documents. Existing records cannot
+be edited through browser clients.
 
-`firestore.rules` grants patient reads to verified authenticated users with an
-Admin-set `admin`/`immortals_viewer` claim or a server-managed
-`dashboard_access/{verified_email}` document containing `enabled: true`.
-All browser writes and access-list reads/writes are denied. Gateway/Admin SDK
+`firestore.rules` grants public reads under `patients/{patient_id}`, including
+its monitoring, reading, and transcript subcollections.
+Profile creation must atomically advance the website's daily registration counter.
+Measurement creation/edits, existing-profile edits, and access-list reads/writes
+are denied. Gateway/Admin SDK
 credentials stay outside this website and bypass client rules as intended.
 
 Firestore rules deploy to **Firebase**, separately from the website and environment
@@ -119,9 +131,39 @@ project using `--account`. Rule tests use only the local `demo-immortals` emulat
 npm run test:rules
 ```
 
-Java 21 or later is required for the current Firestore emulator. These six checks
-cover anonymous access, verified viewers, disabled users, claims, write denial,
-and isolation of the access list and unrelated collections.
+Java 21 or later is required for the current Firestore emulator. These nine checks
+cover public reads, anonymous registration, concurrent ID allocation, immutable
+records, atomic profile/counter writes, complete patient deletion, and access-list isolation.
+
+## Patient registration
+
+`/patients/new` uses the sender v2 fields: name (1–80 characters), age (a whole
+number from 0–130), and sex (Female, Male, Other, or Prefer not to say). It stores
+`patient_id`, matching `patient_code`, a UUID, `created_at`, and `age_recorded_at`,
+so the profile passes `Sender_v2/patient_common.py` validation and can be read by
+the receiving gateway's patient-list synchronization.
+
+The ID follows the sender's `IMM-YYYYMMDD-XXXXXXXX-NNNNN` nomenclature, using the
+India registration date and a persistent daily sequence. The website's separate
+eight-hex registrar code is `57454201`; the Pi uses its XBee address suffix.
+This keeps website registrations separate from the sender's offline counters.
+The website counter is stored at `registration_counters/{prefix}`. Registration
+transactions keep the ID unique during simultaneous submissions. Preview mode
+does not create patient records.
+
+## Titles and sharing previews
+
+Each page includes a title, description, canonical URL, Open Graph tags for
+WhatsApp/Facebook/LinkedIn, and a Twitter large-image card. The shared branded
+image is `public/social-preview.png` (1200×630), with PNG favicon, home-screen
+icons, an Apple touch icon, a manifest, theme color, and WebSite structured data.
+Patient names and measurements are not embedded in sharing images.
+
+Regenerate the brand assets with the installed Next.js/Sharp dependencies:
+
+```sh
+node scripts/generate-brand-assets.mjs
+```
 
 ## Vercel and GitHub
 

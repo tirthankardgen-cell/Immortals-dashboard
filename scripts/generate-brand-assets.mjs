@@ -1,0 +1,20 @@
+import { mkdir, readFile } from 'node:fs/promises';
+import sharp from 'sharp';
+
+await mkdir('public', {recursive:true});
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#0b1321"/><stop offset="1" stop-color="#13273a"/></linearGradient><radialGradient id="glow"><stop stop-color="#54e3b0" stop-opacity=".13"/><stop offset="1" stop-color="#54e3b0" stop-opacity="0"/></radialGradient><pattern id="grid" width="35" height="35" patternUnits="userSpaceOnUse"><path d="M35 0H0V35" fill="none" stroke="#9aadc8" stroke-opacity=".045"/></pattern></defs>
+<rect width="1200" height="630" fill="url(#bg)"/><rect width="1200" height="630" fill="url(#grid)"/><circle cx="975" cy="355" r="320" fill="url(#glow)"/>
+<rect x="67" y="73" width="58" height="58" rx="15" fill="#142136" stroke="#54e3b0" stroke-opacity=".25"/><path d="M76 102h12l7-18 11 36 7-18h8" fill="none" stroke="#54e3b0" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+<g font-family="Arial, sans-serif"><text x="145" y="101" fill="#edf5ff" font-size="25" font-weight="700" letter-spacing="3">IMMORTALS</text><text x="146" y="122" fill="#9aadc8" font-size="11" letter-spacing="2.5">PATIENT MONITORING</text>
+<text x="68" y="238" fill="#54e3b0" font-size="14" letter-spacing="3">ONE CONNECTED WORKSPACE</text><text x="64" y="309" fill="#edf5ff" font-size="55" font-weight="700" letter-spacing="-2">Patient monitoring,</text><text x="64" y="375" fill="#edf5ff" font-size="55" font-weight="700" letter-spacing="-2">at a glance<tspan fill="#54e3b0">.</tspan></text>
+<text x="69" y="432" fill="#a8bdd4" font-size="19">Patient records · Vitals · Recorded history</text><rect x="68" y="480" width="198" height="41" rx="20" fill="#54e3b0" fill-opacity=".09" stroke="#54e3b0" stroke-opacity=".25"/><circle cx="86" cy="500" r="4" fill="#54e3b0"/><text x="100" y="507" fill="#54e3b0" font-size="14">Immortals Dashboard</text>
+<rect x="716" y="165" width="418" height="339" rx="24" fill="#111e30" stroke="#294158" stroke-width="1.5"/><rect x="738" y="188" width="373" height="57" rx="11" fill="#18283d"/><rect x="752" y="200" width="33" height="33" rx="9" fill="#54e3b0" fill-opacity=".1"/><path d="M760 216h5l3-7 4 15 3-8h5" stroke="#54e3b0" stroke-width="2" fill="none"/><text x="799" y="219" fill="#edf5ff" font-size="16" font-weight="700">Patient overview</text><circle cx="1087" cy="216" r="5" fill="#54e3b0"/>
+<rect x="738" y="260" width="115" height="69" rx="11" fill="#18283d"/><rect x="867" y="260" width="115" height="69" rx="11" fill="#18283d"/><rect x="996" y="260" width="115" height="69" rx="11" fill="#18283d"/><text x="752" y="283" fill="#9aadc8" font-size="11">Heart rate</text><text x="881" y="283" fill="#9aadc8" font-size="11">Blood oxygen</text><text x="1010" y="283" fill="#9aadc8" font-size="11">Temperature</text><rect x="752" y="301" width="62" height="6" rx="3" fill="#54e3b0"/><rect x="881" y="301" width="65" height="6" rx="3" fill="#61baff"/><rect x="1010" y="301" width="65" height="6" rx="3" fill="#ffcb78"/>
+<rect x="738" y="346" width="373" height="133" rx="11" fill="#0d1929" stroke="#294158"/><text x="752" y="369" fill="#9aadc8" font-size="11">Waveform display</text><path d="M752 418h19l8-11 10 18 12-25 15 44 12-26h22l9-11 10 19 14-41 13 59 10-27h24l8-12 9 21 12-46 14 61 12-24h29l9-12 11 21 11-40 13 57 13-27h25" fill="none" stroke="#54e3b0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="69" y="582" fill="#6e89a7" font-size="13">immortals-dashboard.vercel.app</text></g></svg>`;
+await sharp(Buffer.from(svg)).png().toFile('public/social-preview.png');
+const icon = await readFile('src/app/icon.svg');
+for (const [file,size] of [['public/favicon.png',32],['public/app-icon-192.png',192],['public/app-icon-512.png',512],['src/app/apple-icon.png',180]])
+  await sharp(icon).resize(size,size).png().toFile(file);
+console.log('Generated 1200x630 sharing image and PNG app icons.');

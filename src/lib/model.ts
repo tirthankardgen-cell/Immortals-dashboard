@@ -3,7 +3,7 @@ export type Values = Record<string, number | string | boolean | null>;
 export type Sensor = { status: string; ageSeconds: number | null; values: Values };
 export type Waveform = { times: number[]; values: number[]; unit: string; clear: boolean };
 export type Patient = {
-  id: string; name: string; age: number | null; sex: string;
+  id: string; displayId?: string; name: string; age: number | null; sex: string;
   registeredAt: number | null; deviceId: string | null; ward: string | null;
   bed: string | null; clinician: string | null; contact: string | null; notes: string | null;
 };
@@ -12,6 +12,7 @@ export type Reading = {
   capturedAt: number | null; receivedAt: number | null; uploadedAt: number | null;
   sensors: Partial<Record<SensorName, Sensor>>;
   waveforms: Partial<Record<'pulse' | 'ecg', Waveform>>;
+  recordingMode?: string;
 };
 export type Transcript = {
   id: string; patientId: string; sessionId: string | null; startedAt: number | null;
@@ -46,7 +47,7 @@ export function normalizePatient(id: string, data: unknown): Patient {
   const item = record(data), profile = record(item.profile_details);
   const age = finite(item.age ?? profile.age);
   return {
-    id, name: text(item.name) ?? 'Unnamed patient',
+    id, displayId: text(item.patient_code) ?? text(item.patient_id) ?? id, name: text(item.name) ?? 'Unnamed patient',
     age: age !== null && age >= 0 && age <= 130 ? age : null,
     sex: text(item.sex ?? profile.sex) ?? 'Not entered',
     registeredAt: timestamp(item.created_at), deviceId: text(item.device_id),
@@ -85,7 +86,7 @@ export function normalizeReading(patientId: string, id: string, data: unknown): 
   }
   return { id, patientId, sessionId: text(item.monitoring_session_id), deviceId: text(item.device_id ?? item.sender_id),
     capturedAt: timestamp(item.captured_at ?? item.timestamp), receivedAt: timestamp(item.received_at),
-    uploadedAt: timestamp(item.uploaded_at), sensors, waveforms: waves };
+    uploadedAt: timestamp(item.uploaded_at), sensors, waveforms: waves, recordingMode: text(item.recording_mode) ?? undefined };
 }
 export function normalizeTranscript(patientId: string, id: string, data: unknown): Transcript | null {
   const item = record(data);

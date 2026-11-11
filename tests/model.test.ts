@@ -1,8 +1,15 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { metric, monitoringState, normalizeReading, normalizeTranscript, timestamp, waveformPath } from '../src/lib/model.ts';
+import { metric, monitoringState, normalizePatient, normalizeReading, normalizeTranscript, timestamp, waveformPath } from '../src/lib/model.ts';
 
 const now = Date.parse('2026-11-11T12:00:00Z');
+test('sender patient nomenclature is preserved for display and Firebase association', () => {
+  const id='IMM-20261112-408DF0F0-00001';
+  const p=normalizePatient(id,{patient_id:id,patient_code:id,name:'Patient',age:22,sex:'Male'});
+  assert.equal(p.id,id);assert.equal(p.displayId,id);
+  const r=normalizeReading(id,'capture',{patient_id:id,recording_mode:'submitted_snapshot',captured_at:now-60000});
+  assert.equal(r?.patientId,id);assert.equal(r?.recordingMode,'submitted_snapshot');
+});
 const makeReading = (extra: Record<string, unknown> = {}) => normalizeReading('PAT-A', 'reading-1', {
   patient_id: 'PAT-A', captured_at: now - 1000, uploaded_at: now,
   sensors: {

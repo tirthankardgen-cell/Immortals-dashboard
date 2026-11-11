@@ -18,10 +18,11 @@ export function DataMessage({ error, empty = false, missing = false }: {
     <h2>{missing ? 'Patient not found' : empty ? 'Your patient directory starts here'
       : error?.kind === 'access' ? 'Patient access is protected' : 'Let’s connect your patient records'}</h2>
     <p>{missing ? 'This patient record is not available in the selected workspace.'
-      : empty ? 'Patients will appear here when the gateway saves their profiles. Select a name to open the complete record.'
+      : empty ? 'Create a patient record here, or choose one saved by your gateway. Select a name to open the complete record.'
       : error?.message ?? 'Your records are not available yet.'}</p>
     <div className="flex justify-center flex-wrap gap-2">
       {missing ? <Link className="button" href={href('/')}>Back to patients</Link> : <button className="button" onClick={refresh}>Try again</button>}
+      {empty && <Link className="button primary" href={href('/patients/new')}>New patient</Link>}
       {!preview && <Link className="button primary" href="/?view=preview">Explore the preview <ArrowUpRight size={13}/></Link>}
       {error?.kind === 'access' && <Link className="button" href="/login">Sign in</Link>}
     </div>

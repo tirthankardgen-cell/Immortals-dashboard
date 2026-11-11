@@ -25,7 +25,7 @@ export function SignIn() {
   };
   const submit = (event: FormEvent) => { event.preventDefault(); void authenticate(false); };
   return <><Link className="inline-flex items-center gap-2 text-[10px] muted" href="/"><ArrowLeft size={13}/>Back to patients</Link>
-    <section className="login-card"><ShieldCheck size={26} className="mint"/><h1>Your care workspace.</h1><p>Sign in with your authorized account to access patient profiles, measurements, and conversations.</p>
+    <section className="login-card"><ShieldCheck size={26} className="mint"/><h1>Your care workspace.</h1><p>Account sign-in is optional. Patient records and registration are currently available without signing in.</p>
       {error && <div className="form-error" role="alert">{error}</div>}
       <button className="button w-full mb-5" disabled={busy} onClick={() => void authenticate(true)}><span className="font-bold sky">G</span>Continue with Google</button>
       <div className="text-[9px] muted text-center mb-5">or use your workspace email</div>

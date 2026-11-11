@@ -1,29 +1,63 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    function authorizedViewer() {
-      return request.auth != null
-        && request.auth.token.get('email_verified', false) == true
-        && (
-          request.auth.token.get('admin', false) == true
-          || request.auth.token.get('immortals_viewer', false) == true
-          || (
-            request.auth.token.get('email', '') != ''
-            && exists(/databases/$(database)/documents/dashboard_access/$(request.auth.token.email))
-            && get(/databases/$(database)/documents/dashboard_access/$(request.auth.token.email)).data.enabled == true
-          )
-        );
+    function webPrefix(prefix) {
+      return prefix.matches('IMM-[0-9]{8}-57454201');
     }
+    function validProfile(data, patientId) {
+      return patientId.matches('IMM-[0-9]{8}-57454201-([0-9]{5}|[1-9][0-9]{5,8})')
+        && data.keys().hasAll(['patient_id', 'patient_code', 'patient_uuid', 'name', 'age', 'sex', 'created_at', 'age_recorded_at'])
+        && data.keys().hasOnly(['patient_id', 'patient_code', 'patient_uuid', 'name', 'age', 'sex', 'created_at', 'age_recorded_at'])
+        && data.patient_id == patientId && data.patient_code == patientId
+        && data.patient_uuid is string
+        && data.patient_uuid.matches('[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}')
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 80
+        && data.name.matches('[^\\x00-\\x1F]{1,80}') && data.name.matches('.*[^ ].*')
+        && data.age is int && data.age >= 0 && data.age <= 130
+        && data.sex in ['Female', 'Male', 'Other', 'Prefer not to say']
+        && data.created_at is string
+        && data.created_at.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z')
+        && data.age_recorded_at == data.created_at;
+    }
+    function registrationCounterMatches(patientId) {
+      let parts = patientId.split('-');
+      let prefix = parts[0] + '-' + parts[1] + '-' + parts[2];
+      let counter = /databases/$(database)/documents/registration_counters/$(prefix);
+      return getAfter(counter).data.patient_id == patientId
+        && getAfter(counter).data.value == int(parts[3])
+        && ((!exists(counter) && getAfter(counter).data.value == 1)
+          || (exists(counter) && getAfter(counter).data.value == get(counter).data.value + 1));
+    }
+    function validCounter(data, prefix) {
+      let patient = /databases/$(database)/documents/patients/$(data.patient_id);
+      return webPrefix(prefix)
+        && data.keys().hasAll(['value', 'patient_id']) && data.keys().hasOnly(['value', 'patient_id'])
+        && data.value is int && data.value >= 1 && data.value <= 999999999
+        && data.patient_id is string && data.patient_id.matches(prefix + '-([0-9]{5}|[1-9][0-9]{5,8})')
+        && int(data.patient_id.split('-')[3]) == data.value
+        && !exists(patient) && validProfile(getAfter(patient).data, data.patient_id);
+    }
+    // Temporary public viewing, requested by the owner. Sign-in is not required.
     match /patients/{patientId} {
-      allow read: if authorizedViewer();
-      allow write: if false;
+      allow read: if true;
+      allow create: if validProfile(request.resource.data, patientId) && registrationCounterMatches(patientId);
+      allow update: if false;
+      allow delete: if true;
       match /{record=**} {
-        allow read: if authorizedViewer();
-        allow write: if false;
+        allow read: if true;
+        allow create, update: if false;
+        allow delete: if true;
       }
     }
+    // A new profile and the next website counter must be committed together.
+    match /registration_counters/{prefix} {
+      allow get: if webPrefix(prefix);
+      allow list, delete: if false;
+      allow create: if validCounter(request.resource.data, prefix) && request.resource.data.value == 1;
+      allow update: if validCounter(request.resource.data, prefix) && request.resource.data.value == resource.data.value + 1;
+    }
     // Access entries and measurements are managed by the gateway/Admin SDK.
-    // Browser users cannot grant themselves access or modify patient records.
+    // Patient deletion is public for now; measurement creation/edits remain blocked.
     match /{document=**} { allow read, write: if false; }
   }
 }
