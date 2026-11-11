@@ -8,3 +8,10 @@ node_modules/
 output/
 .playwright-cli/
 next-env.d.ts
+.firebase/
+.deployment-backups/
+firebase-debug.log*
+*.log
+
+.vercel
+.env*

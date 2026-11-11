@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function authorizedViewer() {
+      return request.auth != null
+        && request.auth.token.get('email_verified', false) == true
+        && (
+          request.auth.token.get('admin', false) == true
+          || request.auth.token.get('immortals_viewer', false) == true
+          || (
+            request.auth.token.get('email', '') != ''
+            && exists(/databases/$(database)/documents/dashboard_access/$(request.auth.token.email))
+            && get(/databases/$(database)/documents/dashboard_access/$(request.auth.token.email)).data.enabled == true
+          )
+        );
+    }
+    match /patients/{patientId} {
+      allow read: if authorizedViewer();
+      allow write: if false;
+      match /{record=**} {
+        allow read: if authorizedViewer();
+        allow write: if false;
+      }
+    }
+    // Access entries and measurements are managed by the gateway/Admin SDK.
+    // Browser users cannot grant themselves access or modify patient records.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
