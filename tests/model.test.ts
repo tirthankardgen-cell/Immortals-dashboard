@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { metric, monitoringState, normalizePatient, normalizeReading, normalizeTranscript, timestamp, waveformPath } from '../src/lib/model.ts';
+import { metric, monitoringState, normalizePatient, normalizeReading, normalizeTranscript, sensorFresh, timestamp, waveformPath } from '../src/lib/model.ts';
 
 const now = Date.parse('2026-11-11T12:00:00Z');
 test('sender patient nomenclature is preserved for display and Firebase association', () => {
@@ -28,6 +28,22 @@ test('capture time controls freshness, even after a recent upload', () => {
   assert.equal(monitoringState(old, now), 'stale');
   assert.equal(metric(old, 'pulse', 'heart_rate_bpm', now), null);
   assert.equal(metric(old, 'pulse', 'heart_rate_bpm', now, true), 76);
+});
+test('submitted checkups remain recorded after the live timeout without becoming fresh live data', () => {
+  const capturedAt = now - 60000;
+  const reading = makeReading({ recording_mode: 'submitted_snapshot', captured_at: capturedAt });
+  assert.equal(monitoringState(reading, now), 'recorded');
+  assert.equal(monitoringState(reading, now + 86400000), 'recorded');
+  assert.equal(reading?.capturedAt, capturedAt);
+  assert.equal(sensorFresh(reading, 'pulse', now), false);
+  assert.equal(metric(reading, 'pulse', 'heart_rate_bpm', now, true), 76);
+  assert.equal(monitoringState(makeReading(), now), 'monitoring');
+});
+test('submitted checkups still require a valid capture timestamp', () => {
+  for (const capturedAt of [null, 'invalid', now + 6000]) {
+    const reading = makeReading({ recording_mode: 'submitted_snapshot', captured_at: capturedAt });
+    assert.equal(monitoringState(reading, now), 'unknown');
+  }
 });
 test('freshness expires without a new database event and preserves source age', () => {
   const reading = makeReading();

@@ -19,7 +19,7 @@ export type Transcript = {
   language: string | null; model: string | null;
   segments: { startMs: number; endMs: number; speakerId: string; text: string }[];
 };
-export type MonitoringState = 'monitoring' | 'stale' | 'waiting' | 'unknown';
+export type MonitoringState = 'monitoring' | 'recorded' | 'stale' | 'waiting' | 'unknown';
 
 export function record(value: unknown): Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -103,6 +103,7 @@ export function normalizeTranscript(patientId: string, id: string, data: unknown
 export function monitoringState(reading: Reading | null, now: number): MonitoringState {
   if (!reading) return 'waiting';
   if (reading.capturedAt === null || reading.capturedAt > now + 5000) return 'unknown';
+  if (reading.recordingMode === 'submitted_snapshot') return 'recorded';
   return Math.max(0, now - reading.capturedAt) <= 3000 ? 'monitoring' : 'stale';
 }
 export function metric(reading: Reading | null, sensor: SensorName, field: string, now: number,

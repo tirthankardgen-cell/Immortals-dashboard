@@ -91,7 +91,10 @@ bmp:   temperature_c, pressure_hpa
 Waveform objects have `time_offset_ms`, `values`, `unit`, and `clear`; sample times
 are relative to capture, from -8000 to 0 ms. Missing samples remain gaps. The
 live screen expires old values from capture/source age even if no new database
-event arrives. Historical readings retain their capture-time values. ECG candidate
+event arrives, showing No recent data. Submitted checkups with
+`recording_mode: "submitted_snapshot"` show Recorded in the directory and patient
+record, retaining their original capture time, values, and waveforms after the live
+timeout. Historical readings retain their capture-time values. ECG candidate
 rates remain separate and visibly unreliable. Body temperature uses `object_c`
 without an invented calibration offset and is labelled infrared surface.
 

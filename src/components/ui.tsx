@@ -6,7 +6,7 @@ import type { DataError } from '@/lib/firebase';
 
 export function StatusPill({ status }: { status: string }) {
   const labels: Record<string, string> = { sample: 'Sample data', monitoring: 'Monitoring',
-    stale: 'Paused', waiting: 'No session', unknown: 'Checking' };
+    recorded: 'Recorded', stale: 'No recent data', waiting: 'No session', unknown: 'Checking' };
   return <span className={`status-pill ${status}`}><span />{labels[status] ?? status}</span>;
 }
 export function DataMessage({ error, empty = false, missing = false }: {
