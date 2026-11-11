@@ -1,0 +1,22 @@
+import { createHash } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+
+const audit = JSON.parse(await readFile(new URL('../docs/version-audit.json', import.meta.url)));
+const version = audit.node.version;
+const name = `node-${version}-win-x64.zip`;
+const base = `https://nodejs.org/dist/${version}/`;
+const shaResponse = await fetch(base+'SHASUMS256.txt');
+if (!shaResponse.ok) throw new Error('Official Node checksums unavailable');
+const checksums = await shaResponse.text();
+const expected = checksums.split('\n').find(line => line.endsWith('  '+name))?.split(' ')[0];
+if (!expected) throw new Error('Windows Node download was not listed in official checksums');
+const response = await fetch(base+name);
+if (!response.ok) throw new Error(`Node download: HTTP ${response.status}`);
+const bytes = Buffer.from(await response.arrayBuffer());
+const digest = createHash('sha256').update(bytes).digest('hex');
+if (digest !== expected) throw new Error('Node archive checksum mismatch');
+const directory = fileURLToPath(new URL('../.tools/', import.meta.url));
+await mkdir(directory, { recursive: true });
+await writeFile(`${directory}/${name}`, bytes);
+console.log(`${name}: official SHA-256 verified (${bytes.length} bytes)`);

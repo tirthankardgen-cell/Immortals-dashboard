@@ -1,0 +1,149 @@
+{
+  "checkedForClientDate": "2026-11-11",
+  "fetchedAt": "2026-11-11T17:47:06.739Z",
+  "packages": [
+    {
+      "name": "next",
+      "version": "16.4.6",
+      "source": "https://registry.npmjs.org/next/latest",
+      "engines": {
+        "node": ">=20.9.0"
+      },
+      "peerDependencies": {
+        "sass": "^1.3.0",
+        "react": "^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0",
+        "react-dom": "^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0",
+        "@playwright/test": "^1.51.1",
+        "@opentelemetry/api": "^1.1.0",
+        "babel-plugin-react-compiler": "*"
+      }
+    },
+    {
+      "name": "react",
+      "version": "19.3.1",
+      "source": "https://registry.npmjs.org/react/latest",
+      "engines": {
+        "node": ">=0.10.0"
+      }
+    },
+    {
+      "name": "react-dom",
+      "version": "19.3.1",
+      "source": "https://registry.npmjs.org/react-dom/latest",
+      "peerDependencies": {
+        "react": "^19.3.1"
+      }
+    },
+    {
+      "name": "tailwindcss",
+      "version": "4.3.5",
+      "source": "https://registry.npmjs.org/tailwindcss/latest"
+    },
+    {
+      "name": "@tailwindcss/postcss",
+      "version": "4.3.5",
+      "source": "https://registry.npmjs.org/%40tailwindcss%2Fpostcss/latest"
+    },
+    {
+      "name": "firebase",
+      "version": "13.2.0",
+      "source": "https://registry.npmjs.org/firebase/latest"
+    },
+    {
+      "name": "lucide-react",
+      "version": "1.72.0",
+      "source": "https://registry.npmjs.org/lucide-react/latest",
+      "peerDependencies": {
+        "react": "^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0",
+        "@types/react": "*"
+      }
+    },
+    {
+      "name": "typescript",
+      "version": "7.0.2",
+      "source": "https://registry.npmjs.org/typescript/latest",
+      "engines": {
+        "node": ">=16.20.0"
+      }
+    },
+    {
+      "name": "eslint",
+      "version": "10.14.0",
+      "source": "https://registry.npmjs.org/eslint/latest",
+      "engines": {
+        "node": "^20.19.0 || ^22.13.0 || >=24"
+      },
+      "peerDependencies": {
+        "jiti": "*"
+      }
+    },
+    {
+      "name": "eslint-config-next",
+      "version": "16.4.6",
+      "source": "https://registry.npmjs.org/eslint-config-next/latest",
+      "peerDependencies": {
+        "eslint": ">=9.0.0",
+        "typescript": ">=3.3.1"
+      }
+    },
+    {
+      "name": "@types/react",
+      "version": "19.3.0",
+      "source": "https://registry.npmjs.org/%40types%2Freact/latest",
+      "peerDependencies": {}
+    },
+    {
+      "name": "@types/react-dom",
+      "version": "19.3.0",
+      "source": "https://registry.npmjs.org/%40types%2Freact-dom/latest",
+      "peerDependencies": {
+        "@types/react": "^19.3.0"
+      }
+    },
+    {
+      "name": "@types/node",
+      "version": "26.6.6",
+      "source": "https://registry.npmjs.org/%40types%2Fnode/latest",
+      "peerDependencies": {}
+    },
+    {
+      "name": "@fontsource-variable/manrope",
+      "version": "5.3.0",
+      "source": "https://registry.npmjs.org/%40fontsource-variable%2Fmanrope/latest"
+    }
+  ],
+  "node": {
+    "version": "v26.13.1",
+    "date": "2026-11-10",
+    "files": [
+      "aix-ppc64",
+      "headers",
+      "linux-arm64",
+      "linux-ppc64le",
+      "linux-s390x",
+      "linux-x64",
+      "linux-x64-musl",
+      "osx-arm64-tar",
+      "osx-x64-pkg",
+      "osx-x64-tar",
+      "src",
+      "win-arm64-7z",
+      "win-arm64-zip",
+      "win-x64-7z",
+      "win-x64-exe",
+      "win-x64-msi",
+      "win-x64-zip"
+    ],
+    "npm": "11.20.0",
+    "zlib": "1.3.2.1-motley",
+    "openssl": "3.5.9",
+    "modules": "147",
+    "lts": "Lithium",
+    "security": true,
+    "source": "https://nodejs.org/dist/index.json"
+  },
+  "vercel": {
+    "source": "https://vercel.com/docs/functions/runtimes/node-js/node-js-versions",
+    "selectedMajor": "26.x"
+  }
+}
