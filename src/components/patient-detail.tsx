@@ -13,7 +13,7 @@ function WaveCard({ kind, wave, show, status, preview }: { kind: 'pulse' | 'ecg'
   return <article className="wave-card"><div className="wave-head" style={{ color }}><span className="flex items-center gap-2"><Waves size={14}/>{kind === 'pulse' ? 'Pulse waveform' : 'ECG waveform'}</span><small>{preview ? 'Sample trace' : '8-second window'}</small></div>
     <div className="wave-plot">{path ? <svg viewBox="0 0 600 150" preserveAspectRatio="none" role="img" aria-label={`${preview ? 'Sample' : 'Received'} ${kind} waveform`}><path d={path} fill="none" stroke={color} strokeWidth="1.8" vectorEffect="non-scaling-stroke"/></svg>
       : <div className="wave-empty">No current waveform<br/>Fresh samples will appear here.</div>}</div>
-    <div className="wave-caption">{preview ? 'Fictional waveform for interface preview.' : status}<br/>{kind === 'ecg' ? 'Filtered signal · mV at ADC · gaps remain visible' : 'Relative pulse amplitude · MAX30102'}</div>
+    <div className="wave-caption"><span className="wave-status">{preview ? 'Fictional waveform for interface preview.' : status}</span><span className="wave-unit">{kind === 'ecg' ? 'Filtered signal · mV at ADC · gaps remain visible' : 'Relative pulse amplitude · MAX30102'}</span></div>
   </article>;
 }
 function RecordHistory({ state }: { state: DataState<Reading[]> }) {
@@ -71,8 +71,8 @@ export function PatientDetail({ patientId }: { patientId: string }) {
     <Link href={href('/')} className="patient-back inline-flex items-center gap-2 text-[10px] muted mb-5"><ArrowLeft size={13}/>Back to patient directory</Link>
     <header className="patient-banner"><div className="flex items-center gap-4 min-w-0"><div className="avatar">{initials(patient.name)}</div><div>
       <div className="eyebrow" style={{ fontSize: 8 }}>PATIENT INFORMATION</div><h1>{patient.name}</h1><div className="patient-meta"><span className="id-tag mono">{patient.displayId ?? patient.id}</span><span>{patient.age ?? '—'} years</span><span>{patient.sex}</span>{patient.ward && <span>Ward {patient.ward} · Bed {patient.bed ?? '—'}</span>}</div>
-    </div></div><div className="patient-banner-right text-right"><StatusPill status={state}/><div className="text-[9px] muted mt-3">{preview ? 'Sample capture' : 'Last recorded'} · {formatTime(reading?.capturedAt ?? null)}</div></div></header>
-    <div className="patient-tabs-row flex items-end justify-between gap-3"><div className="tabs" role="tablist" aria-label="Patient record sections">
+    </div></div><div className="patient-banner-right text-right"><StatusPill status={state}/><div className="text-[9px] muted mt-3" title={recorded ? 'These saved vitals and waveforms describe this recording.' : undefined}>{preview ? 'Sample capture' : recorded ? 'Recorded capture' : 'Last recorded'} · {formatTime(reading?.capturedAt ?? null, recorded)}</div></div></header>
+    <div className="patient-tabs-row"><div className="tabs" role="tablist" aria-label="Patient record sections">
       {[['overview', 'Overview'], ['information', 'Information'], ['history', 'Record history'], ['transcripts', 'Transcripts']].map(([key, label]) => <button className={`tab ${tab === key ? 'active' : ''}`} key={key} role="tab" tabIndex={tab === key ? 0 : -1} aria-selected={tab === key} aria-controls={`panel-${key}`} id={`tab-${key}`} onClick={() => setTab(key)} onKeyDown={event => {
         const keys = sections;
         if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
@@ -80,11 +80,10 @@ export function PatientDetail({ patientId }: { patientId: string }) {
           setTab(next); requestAnimationFrame(() => document.getElementById(`tab-${next}`)?.focus());
         }
       }}>{label}</button>)}
-    </div><div className="patient-tools flex items-center gap-2 mb-7"><button className="icon-button" aria-label="Export patient record as JSON" onClick={exportRecord}><Download size={16}/></button><DeletePatientButton patient={patient}/></div></div>
+    </div><div className="patient-tools flex items-center gap-2"><button className="icon-button" aria-label="Export patient record as JSON" onClick={exportRecord}><Download size={16}/></button><DeletePatientButton patient={patient}/></div></div>
     <section className={`patient-content ${tab === 'overview' ? 'overview-content' : ''}`} id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`}>
       {tab === 'information' ? <Profile patient={patient} reading={reading}/> : tab === 'history' ? <RecordHistory state={history}/> : tab === 'transcripts' ? <Transcripts state={transcripts}/>
         : <>{latest.status === 'error' && <div className="note-bar" role="status"><Info size={14}/>{latest.error?.message}</div>}
-          {!preview && recorded && <div className="note-bar" role="status"><Clock3 size={14}/>Recorded capture · {formatTime(reading?.capturedAt ?? null, true)}. These saved values and waveforms describe that recording.</div>}
           {!preview && !recorded && state === 'stale' && <div className="note-bar" role="status"><Clock3 size={14}/>Monitoring is paused. Current values are cleared; previous measurements are available in Record history.</div>}
           <div className="detail-grid"><div className="vitals-area"><h2 className="section-heading">Patient vitals<span className="text-[8px] muted font-normal">{preview ? 'Sample measurements' : recorded ? 'Last recorded capture' : 'Latest source measurements'}</span></h2>
             <div className="vital-grid">{[

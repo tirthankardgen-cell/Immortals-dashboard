@@ -137,6 +137,15 @@ records, atomic profile/counter writes, complete patient deletion, and access-li
 
 ## Patient registration
 
+The public header shows the Firebase connection status. Preview and Sign in
+controls are removed from the dashboard. Patient search combines age groups,
+gender, and measured/not-measured filters with name/ID search, sorting, and
+list/grid views. Measurement filters check matching patients before pagination;
+older saved captures still count as measured. Reset clears all search filters.
+
+Compact record layouts keep controls, waveform captions, and measurement notes
+separate. Recorded capture timestamps appear in the patient header.
+
 `/patients/new` uses the sender v2 fields: name (1–80 characters), age (a whole
 number from 0–130), and sex (Female, Male, Other, or Prefer not to say). It stores
 `patient_id`, matching `patient_code`, a UUID, `created_at`, and `age_recorded_at`,

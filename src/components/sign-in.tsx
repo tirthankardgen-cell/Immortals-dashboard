@@ -32,6 +32,5 @@ export function SignIn() {
       <form onSubmit={submit}><div className="field"><label htmlFor="email">Email address</label><input required type="email" id="email" autoComplete="username" placeholder="you@example.com" value={email} onChange={event => setEmail(event.target.value)}/></div>
         <div className="field"><label htmlFor="password">Password</label><input required type="password" id="password" autoComplete="current-password" minLength={6} value={password} onChange={event => setPassword(event.target.value)}/></div>
         <button className="button primary w-full mt-2" disabled={busy} type="submit">{busy && <LoaderCircle size={14} className="animate-spin"/>}{busy ? 'Signing in…' : 'Sign in to workspace'}</button></form>
-      <p className="text-[10px] muted text-center mt-6 leading-7">Exploring the interface? <Link href="/?view=preview" className="mint">Open the preview</Link>.</p>
     </section></>;
 }

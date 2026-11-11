@@ -1,15 +1,15 @@
 'use client';
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Activity, ArrowUpRight, AudioLines, ChevronRight, CircleHelp, Clock3, Cloud, FileText, LogOut, Menu, UserRoundPlus, UsersRound, X } from 'lucide-react';
-import { signOut } from 'firebase/auth';
-import { getFirebase } from '@/lib/firebase';
+import { Activity, AudioLines, ChevronRight, CircleHelp, Clock3, Cloud, FileText, Menu, UserRoundPlus, UsersRound, X } from 'lucide-react';
+import { useCloudStatus } from '@/lib/use-cloud-status';
 import { useWorkspace } from './workspace-provider';
 
 export function AppShell({ children }: { children: ReactNode }) {
-  const { preview, user, online, href } = useWorkspace();
-  const path = usePathname(), router = useRouter();
+  const { preview, href } = useWorkspace();
+  const cloud = useCloudStatus();
+  const path = usePathname();
   const params = useSearchParams(), patientPage = path.startsWith('/patients/') && path !== '/patients/new';
   const pageClass = path === '/' ? 'directory-page' : path === '/patients/new' ? 'registration-page' : patientPage ? 'patient-page' : 'other-page';
   const [menu, setMenu] = useState(false), [help, setHelp] = useState(false);
@@ -48,10 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </div>
         <div className="top-actions">
-          <span className="hide-small flex items-center gap-2 text-[10px] muted"><span className="connection-dot" style={{ background: preview ? '#61baff' : online ? '#54e3b0' : '#ffcb78' }}/>{preview ? 'Preview workspace' : online ? 'Cloud workspace' : 'Offline'}</span>
-          <Link className="button ghost" href={preview ? path : `${path}?view=preview`}>{preview ? 'Live records' : 'Preview'}<ArrowUpRight size={12}/></Link>
-          {user ? <button className="icon-button" aria-label="Sign out" onClick={async () => { await signOut(getFirebase().auth); router.push('/'); }}><LogOut size={15}/></button>
-            : <Link className="button" href="/login">Sign in</Link>}
+          <span className="cloud-status" role="status" title={cloud.message} aria-label={`Firebase: ${cloud.label}`}><span className="connection-dot" style={{ background: cloud.color }}/>{cloud.label}</span>
         </div>
       </header>
       {preview && <div className="preview-notice" role="status"><span className="status-pill sample">Preview</span>

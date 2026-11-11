@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { ArrowUpRight, LoaderCircle, ShieldCheck, UsersRound } from 'lucide-react';
+import { LoaderCircle, ShieldCheck, UsersRound } from 'lucide-react';
 import { useWorkspace } from './workspace-provider';
 import type { DataError } from '@/lib/firebase';
 
@@ -12,7 +12,7 @@ export function StatusPill({ status }: { status: string }) {
 export function DataMessage({ error, empty = false, missing = false }: {
   error?: DataError | null; empty?: boolean; missing?: boolean;
 }) {
-  const { refresh, href, preview } = useWorkspace();
+  const { refresh, href } = useWorkspace();
   return <div className="empty" role={error ? 'status' : undefined}>
     <div className="empty-symbol">{error?.kind === 'access' ? <ShieldCheck size={25}/> : <UsersRound size={25}/>}</div>
     <h2>{missing ? 'Patient not found' : empty ? 'Your patient directory starts here'
@@ -23,8 +23,6 @@ export function DataMessage({ error, empty = false, missing = false }: {
     <div className="flex justify-center flex-wrap gap-2">
       {missing ? <Link className="button" href={href('/')}>Back to patients</Link> : <button className="button" onClick={refresh}>Try again</button>}
       {empty && <Link className="button primary" href={href('/patients/new')}>New patient</Link>}
-      {!preview && <Link className="button primary" href="/?view=preview">Explore the preview <ArrowUpRight size={13}/></Link>}
-      {error?.kind === 'access' && <Link className="button" href="/login">Sign in</Link>}
     </div>
   </div>;
 }

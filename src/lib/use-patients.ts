@@ -79,15 +79,28 @@ export function useTranscripts(id: string): DataState<Transcript[]> {
 export function useDirectoryReadings(ids: string[]) {
   const { preview, refreshKey, user } = useWorkspace(), idsKey = JSON.stringify(ids);
   const key = `${idsKey}:${refreshKey}:${user?.uid ?? 'anonymous'}`;
-  const [state, setState] = useState<{ key: string; data: Record<string, Reading | null | undefined> }>({ key: '', data: {} });
+  const [state, setState] = useState<{ key: string; data: Record<string, Reading | null | undefined>; errors: Record<string, DataError> }>({ key: '', data: {}, errors: {} });
   useEffect(() => {
     if (preview) return;
-    const visibleIds: string[] = JSON.parse(idsKey);
-    const subscriptions = visibleIds.map(id => onSnapshot(doc(getFirebase().db, `patients/${id}/monitoring/latest`), snapshot => {
-      setState(previous => ({ key, data: { ...(previous.key === key ? previous.data : {}),
-        [id]: snapshot.exists() ? normalizeReading(id, snapshot.id, snapshot.data()) : null } }));
-    }, () => setState(previous => ({ key, data: { ...(previous.key === key ? previous.data : {}), [id]: undefined } }))));
-    return () => subscriptions.forEach(unsubscribe => unsubscribe());
+    const patientIds: string[] = JSON.parse(idsKey);
+    const timer = setTimeout(() => setState(previous => {
+      const current = previous.key === key ? previous : { key, data: {}, errors: {} };
+      const errors = { ...current.errors };
+      patientIds.forEach(id => { if (current.data[id] === undefined) errors[id] = timeoutError; });
+      return { ...current, errors };
+    }), 12000);
+    const subscriptions = patientIds.map(id => onSnapshot(doc(getFirebase().db, `patients/${id}/monitoring/latest`), { includeMetadataChanges: true }, snapshot => {
+      if (snapshot.metadata.fromCache && !snapshot.exists()) return;
+      setState(previous => {
+        const errors = { ...(previous.key === key ? previous.errors : {}) }; delete errors[id];
+        return { key, errors, data: { ...(previous.key === key ? previous.data : {}),
+          [id]: snapshot.exists() ? normalizeReading(id, snapshot.id, snapshot.data()) : null } };
+      });
+    }, error => setState(previous => ({ key, data: previous.key === key ? previous.data : {},
+      errors: { ...(previous.key === key ? previous.errors : {}), [id]: dataError(error) } }))));
+    return () => { clearTimeout(timer); subscriptions.forEach(unsubscribe => unsubscribe()); };
   }, [preview, idsKey, key]);
-  return preview ? Object.fromEntries(ids.map(id => [id, previewReading(id)])) : state.key === key ? state.data : {};
+  const readings = preview ? Object.fromEntries(ids.map(id => [id, previewReading(id)])) : state.key === key ? state.data : {};
+  const errors = preview || state.key !== key ? {} : state.errors;
+  return { readings, pending: ids.some(id => readings[id] === undefined && !errors[id]), error: Object.values(errors)[0] ?? null };
 }

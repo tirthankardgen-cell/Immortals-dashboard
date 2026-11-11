@@ -643,6 +643,43 @@ and `transcripts` documents in batches, then removes the profile. It does not
 change other patients or remove the sender/gateway's local cache/outbox; a
 later gateway upload can recreate a patient that is still stored on a Pi.
 
+
+### Public dashboard UI and patient search filters
+
+The public dashboard no longer shows Preview or Sign in controls in its header,
+empty states, or error panels. Its Firebase connection indicator appears in the
+header on every page, showing Connected, Connecting, Cached, Offline, or
+Unavailable as appropriate. The previous directory connection-status card has
+been removed.
+
+The directory combines patient name/ID search with these filters:
+
+- **Age group:** all ages, 0–17, 18–35, 36–59, 60+, or age not entered.
+- **Gender:** all genders, Female, Male, Other, Prefer not to say, or not entered.
+  This filter reads the sender-compatible `sex` profile field.
+- **Measurements:** all patients, measured, or not measured. Measured means a
+  saved latest snapshot exists, including an older/paused recorded capture.
+  Not measured means the gateway's latest document is confirmed absent.
+- **Sort and display:** name/newest order, list/grid views, and one Reset action
+  for the search text and all filters.
+
+Measurement filtering checks every matching name/age/gender candidate before
+pagination; it does not stop at the patients visible on the current page.
+Unknown responses show a checking state, and failed reads show an error/retry
+state instead of being classified as not measured.
+
+Patient record controls have their own spacing beneath the header. The recorded
+capture timestamp is in the patient header, keeping more space for the vital
+cards and waveforms. Plots adapt to the available height while reserving space
+for quality labels and units, so waveform captions do not overlap the lower note.
+Directory pagination measures both the toolbar and footer. Compact grid cards
+keep the name, ID, demographic line, and record controls inside their boundaries.
+
+Browser checks covered patient vitals plus directory list/grid layouts at
+1280×600, 1024×600, 900×520, and 1440×800, with responsive mobile width checked at
+390 pixels. Combined age/gender/measurement filters, reset behavior, the header
+connection label, and the absence of Preview/Sign in controls passed.
+
 ### Deployed Firestore rules
 
 The source is `Website/firestore.rules` in the parent workspace and
